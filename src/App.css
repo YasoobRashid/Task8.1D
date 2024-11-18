@@ -149,3 +149,36 @@ button {
 button:hover {
   background-color: #0095ff; 
 }
+
+.filters {
+  display: flex;
+  flex-direction: column; 
+  gap: 15px; 
+  max-width: 100%; 
+  margin-bottom: 20px;
+}
+
+.filters input {
+  padding: 12px;
+  width: 100%;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 16px;
+  box-sizing: border-box; 
+}
+
+@media (min-width: 768px) {
+  .filters {
+    flex-direction: row; 
+    justify-content: space-between; 
+  }
+  
+  .filters input {
+    flex: 1; 
+    margin-right: 10px; 
+  }
+
+  .filters input:last-child {
+    margin-right: 0; 
+  }
+}
