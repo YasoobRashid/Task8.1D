@@ -4,13 +4,18 @@ import { collection, getDocs, deleteDoc, doc } from 'firebase/firestore';
 
 function FindQuestions() {
   const [questions, setQuestions] = useState([]);
-  const [filter, setFilter] = useState('');
-  const [expandedQuestionId, setExpandedQuestionId] = useState(null); 
+  const [titleFilter, setTitleFilter] = useState('');
+  const [dateFilter, setDateFilter] = useState('');
+  const [tagFilter, setTagFilter] = useState('');
+  const [expandedQuestionId, setExpandedQuestionId] = useState(null);
 
   useEffect(() => {
     const fetchQuestions = async () => {
       const querySnapshot = await getDocs(collection(db, 'posts'));
-      setQuestions(querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+      const questionsOnly = querySnapshot.docs
+        .map((doc) => ({ id: doc.id, ...doc.data() }))
+        .filter((post) => post.postType === 'question');
+        setQuestions(questionsOnly);
     };
     fetchQuestions();
   }, []);
@@ -21,22 +26,45 @@ function FindQuestions() {
   };
 
   const toggleExpand = (id) => {
-    setExpandedQuestionId(expandedQuestionId === id ? null : id); 
+    setExpandedQuestionId(expandedQuestionId === id ? null : id);
   };
 
-  const filteredQuestions = questions.filter(q =>
-    q.title.toLowerCase().includes(filter.toLowerCase())
-  );
+  // Filter by title, date, and tag
+  const filteredQuestions = questions.filter(q => {
+    const matchesTitle = q.title.toLowerCase().includes(titleFilter.toLowerCase());
+    const matchesDate = dateFilter ? new Date(q.createdAt?.toDate()).toDateString() === new Date(dateFilter).toDateString() : true;
+    const matchesTag = q.tags.toLowerCase().includes(tagFilter.toLowerCase());
+    
+    return matchesTitle && matchesDate && matchesTag;
+  });
 
   return (
     <div>
       <h1>Find Questions</h1>
-      <input
-        type="text"
-        placeholder="Filter by title"
-        value={filter}
-        onChange={(e) => setFilter(e.target.value)}
-      />
+      
+      <div className="filters">
+        <input
+          type="text"
+          placeholder="Filter by title"
+          value={titleFilter}
+          onChange={(e) => setTitleFilter(e.target.value)}
+        />
+        
+        <input
+          type="date"
+          placeholder="Filter by date"
+          value={dateFilter}
+          onChange={(e) => setDateFilter(e.target.value)}
+        />
+
+        <input
+          type="text"
+          placeholder="Filter by tag"
+          value={tagFilter}
+          onChange={(e) => setTagFilter(e.target.value)}
+        />
+      </div>
+
       <ul>
         {filteredQuestions.map(question => (
           <li key={question.id}>
